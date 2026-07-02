@@ -1,0 +1,49 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    meta.helm.sh/release-name: fk-vault
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2026-06-19T13:18:15Z"
+  generation: 2
+  labels:
+    app.kubernetes.io/instance: fk-vault
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: vault-agent-injector
+  name: fk-vault-agent-injector-cfg
+  resourceVersion: "1310255"
+  uid: a062f01b-c447-4bf4-accb-3dab58f463f6
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNTVENDQWU2Z0F3SUJBZ0lVVU9QMUgyQ01FMk14TzVYb0FHbHRqb3Rtb2pvd0NnWUlLb1pJemowRUF3SXcKR2pFWU1CWUdBMVVFQXhNUFFXZGxiblFnU1c1cVpXTjBJRU5CTUI0WERUSTJNRFl4T0RBNE5ERXpNVm9YRFRNMgpNRFl4TlRBNE5ESXpNVm93R2pFWU1CWUdBMVVFQXhNUFFXZGxiblFnU1c1cVpXTjBJRU5CTUZrd0V3WUhLb1pJCnpqMENBUVlJS29aSXpqMERBUWNEUWdBRXZVWXJNVGRYN3hBYzBTZHcwTjdMWk03a1dOUTdJbkwyRGxFenFlRGwKQmZLVlpTTjBFZzJ2L0lJR0gxLzVXYTVuTjRRZGdTTEpCMXVQWE41UWhBYU93cU9DQVJBd2dnRU1NQTRHQTFVZApEd0VCL3dRRUF3SUNoREFUQmdOVkhTVUVEREFLQmdnckJnRUZCUWNEQVRBUEJnTlZIUk1CQWY4RUJUQURBUUgvCk1HZ0dBMVVkRGdSaEJGODJaam95WkRveFl6cGxOenBpT0Rwa05UcGxNRHBqTmpvNVpqb3daVHBqTURwaU5qb3kKTmpvMk5Eb3lNem96TWpwbE9EbzNNRG81T1RwbE5Ub3pOam80T1Rwa1pqb3hZenBsTWpwak9EcGhaRG8xWWpvdwpNem81TmpvM01UbzBOVEJxQmdOVkhTTUVZekJoZ0Y4Mlpqb3laRG94WXpwbE56cGlPRHBrTlRwbE1EcGpOam81Clpqb3daVHBqTURwaU5qb3lOam8yTkRveU16b3pNanBsT0RvM01EbzVPVHBsTlRvek5qbzRPVHBrWmpveFl6cGwKTWpwak9EcGhaRG8xWWpvd016bzVOam8zTVRvME5UQUtCZ2dxaGtqT1BRUURBZ05KQURCR0FpRUE5amt4cWpXMwp4N2srQ1NrQWQ0QVhWb0lxZFA2citZSnVYUExtUGdLd2h1TUNJUUN4dlJDcE5RNUxZUE5qZVRERXBsNFlSSUZNCmFVTTN5WFNUamJ1M0xsajlZQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNSekNDQWU2Z0F3SUJBZ0lVWVc0OXNCalNzNTh1MkxZU0ZXUnBrZ1NxZDdvd0NnWUlLb1pJemowRUF3SXcKR2pFWU1CWUdBMVVFQXhNUFFXZGxiblFnU1c1cVpXTjBJRU5CTUI0WERUSTJNRFl4T1RBM01USXpNbG9YRFRNMgpNRFl4TmpBM01UTXpNbG93R2pFWU1CWUdBMVVFQXhNUFFXZGxiblFnU1c1cVpXTjBJRU5CTUZrd0V3WUhLb1pJCnpqMENBUVlJS29aSXpqMERBUWNEUWdBRUtWWmtGSzBDOGc0bWlacFMvZGZTOGRYeWlSaGc4UVlQQWp0bVlsQUcKaytETVpxTFlUc0FlMDNsYkFYaWtDQ1A2RjZDbWUzSmd1MTc3NjJVRU5PRldRNk9DQVJBd2dnRU1NQTRHQTFVZApEd0VCL3dRRUF3SUNoREFUQmdOVkhTVUVEREFLQmdnckJnRUZCUWNEQVRBUEJnTlZIUk1CQWY4RUJUQURBUUgvCk1HZ0dBMVVkRGdSaEJGODVPRG93TURvd05EcGlaVG96TXpvNU5UbzBZanBpTlRvd1pqb3pOam8wTXpvME9UcGkKTWpwbE1EbzBNRG80TVRwa09EcGxOam96TWpvd1pEcGlZVG8zWmpvME1qcGxZVHBtWVRveU56bzNPRG8xTURwbQpNem95TnpvNVpUbzNaREJxQmdOVkhTTUVZekJoZ0Y4NU9Eb3dNRG93TkRwaVpUb3pNem81TlRvMFlqcGlOVG93Clpqb3pOam8wTXpvME9UcGlNanBsTURvME1EbzRNVHBrT0RwbE5qb3pNam93WkRwaVlUbzNaam8wTWpwbFlUcG0KWVRveU56bzNPRG8xTURwbU16b3lOem81WlRvM1pEQUtCZ2dxaGtqT1BRUURBZ05IQURCRUFpQjBock1VcXFkMAphcElvR3lpcEdVRXZNMmFRQzVpd0o5Z296c2x2TkNRblVnSWdWanA5OHJEcjFOSEtlU2NydEFUVWlrQUh1eG9MCjRHdUtTWkMvSkxNTml2UT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+    service:
+      name: fk-vault-agent-injector-svc
+      namespace: default
+      path: /mutate
+      port: 443
+  failurePolicy: Ignore
+  matchPolicy: Exact
+  name: vault.hashicorp.com
+  namespaceSelector: {}
+  objectSelector:
+    matchExpressions:
+    - key: app.kubernetes.io/name
+      operator: NotIn
+      values:
+      - vault-agent-injector
+  reinvocationPolicy: Never
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - pods
+    scope: Namespaced
+  sideEffects: None
+  timeoutSeconds: 30

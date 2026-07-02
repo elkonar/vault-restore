@@ -1,0 +1,31 @@
+{{/*
+Copyright IBM Corp. 2018, 2025
+SPDX-License-Identifier: MPL-2.0
+*/}}
+
+{{- template "vault.injectorEnabled" . -}}
+{{- if .injectorEnabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "vault.fullname" . }}-agent-injector-clusterrole
+  labels:
+    app.kubernetes.io/name: {{ include "vault.name" . }}-agent-injector
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+- apiGroups: ["", "admissionregistration.k8s.io"] # was originally ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations", "pods"] # added pods
+  verbs:
+    - "get"
+    - "list"
+    - "watch"
+    - "patch"
+    - "delete" #added
+{{- if and (eq (.Values.injector.leaderElector.enabled | toString) "true") (gt (.Values.injector.replicas | int) 1) }}
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs:
+    - "get"
+{{ end }}
+{{ end }}

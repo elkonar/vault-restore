@@ -1,0 +1,25 @@
+{{- if .Values.webhook_cleaner.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: delete-webhooks-{{ .Release.Revision }}
+  #annotations:                                         <<- use together with ttlSecondsAfterFinished: 300 below
+  #  "helm.sh/hook": post-install,post-upgrade
+  #  "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 30 #0
+  template:
+    spec:
+      serviceAccountName: fk-vault-agent-injector
+      restartPolicy: Never
+      containers:
+      - name: kubectl
+        image: vault:mine1 #{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
+        command:
+        - /bin/sh
+        - -ec
+        - |
+          ls -al > /tmp/tmp.txt
+          # tail -f /dev/null
+          kubectl delete mutatingwebhookconfigurations --all
+{{- end }}

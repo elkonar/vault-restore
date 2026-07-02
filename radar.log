@@ -1,0 +1,10 @@
+nohup: ignoring input
+2026/06/22 11:01:07 [cloud] cloud mode: false (RADAR_CLOUD_MODE="")
+2026/06/22 11:01:07 Radar 1.7.9 starting...
+2026/06/22 11:01:07 Kubeconfig loaded: mode=single, files=1, contexts=1, exec-plugins=0
+2026/06/22 11:01:07 Using kubeconfig: /home/filipkonarski2/.kube/config
+2026/06/22 11:01:07 MCP server enabled at http://localhost:9280/mcp
+2026/06/22 11:01:07 Cleaned image layer cache directory
+2026/06/22 11:01:07 Image layer cache initialized at: /tmp/radar-image-cache
+2026/06/22 11:01:07 SSE broadcaster: cache not ready, waiting for connection...
+2026/06/22 11:01:07 Server error: listen on :9280: listen tcp :9280: bind: address already in use

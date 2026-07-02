@@ -1,0 +1,115 @@
+{{- if .Values.restore.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-restore-{{ .Values.restore.timestamp | default (now | date "20060102-150405") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "vault.fullname" . }}
+    app.kubernetes.io/component: restore
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/tls-skip-verify: "true"
+        vault.hashicorp.com/agent-inject-secret-welcome: "secret/fk-vault-secret/welcome"
+        vault.hashicorp.com/agent-inject-template-welcome: |
+          {{ "{{- with secret \"secret/fk-vault-secret/welcome\" -}}" }}
+          {
+            "username" : "{{ "{{ .Data.username }}" }}",
+            "password" : "{{ "{{ .Data.password }}" }}"
+          }
+          {{ "{{- end }}" }}
+        vault.hashicorp.com/role: "fk-vault-role"
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-000   # tu musi być initcontainer
+        app.kubernetes.io/component: restore_job
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }} #  fk-vault-agent-injector
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        fsGroup: 1000
+      volumes:
+        - name: data-fk-vault-0
+          persistentVolumeClaim:
+            claimName: data-fk-vault-0
+      initContainers:
+        - name: validate-restore
+          image: "{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
+          imagePullPolicy: {{ .Values.restore.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: VAULT_ADDR
+              value: "{{ .Values.restore.vaultAddr | default (printf "http://%s-0.%s-internal:8200" (include "vault.fullname" .) (include "vault.fullname" .)) }}"
+            - name: VAULT_TOKEN
+              {{- if .Values.restore.vaultToken.valueFrom }}
+              valueFrom:
+                {{- toYaml .Values.restore.vaultToken.valueFrom | nindent 16 }}
+              {{- else }}
+              value: {{ .Values.restore.vaultToken.value | quote }}
+              {{- end }}
+            - name: SNAPSHOT_PATH
+              value: {{ .Values.restore.raft.snapshotPath | quote }}
+            - name: RESTORE_PVC
+              value: {{ .Values.restore.pvc.enabled | quote }}
+            - name: PVC_SNAPSHOT_PATH
+              value: {{ .Values.restore.pvc.snapshotPath | quote }}
+            {{- if .Values.restore.extraEnv }}
+            {{- toYaml .Values.restore.extraEnv | nindent 12 }}
+            {{- end }}
+            
+          command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Debug mode"
+          # sleep 3600
+
+          volumeMounts:
+            {{- if .Values.restore.volumeMounts }}
+            {{- toYaml .Values.restore.volumeMounts | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.restore.initContainer.resources | nindent 12 }}
+          {{- if .Values.restore.initContainer.securityContext }}
+          securityContext:
+            {{- toYaml .Values.restore.initContainer.securityContext | nindent 12 }}
+          {{- else }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - SETFCAP
+            readOnlyRootFilesystem: true
+          {{- end }}
+  
+      containers:
+        - name: vault-restore
+          image: "{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
+          command: 
+            - /bin/sh
+            - -ec
+            - |
+              set -e
+              
+              echo "Hello World" > /vault/hworld.txt
+              # kubectl delete mutatingwebhookconfiguration fk-vault-agent-injector-cfg
+              tail -f /dev/null
+       
+  backoffLimit: 2
+{{- end }}
+
+---
+#apiVersion: v1
+#kind: ServiceAccount
+#metadata:
+#  name: fk-vault
+#  labels:
+#    app: fk-vault
