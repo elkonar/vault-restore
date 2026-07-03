@@ -1458,6 +1458,13 @@ serverTelemetry:
 
 # DODAWANE PRZEZ MNIE
 webhook_cleaner:
+  enabled: false
+  image:
+  repository: vault
+  tag: "mine1"
+  pullPolicy: IfNotPresent
+
+webhook2_cleaner:
   enabled: true
   image:
   repository: vault
@@ -1465,7 +1472,7 @@ webhook_cleaner:
   pullPolicy: IfNotPresent
   
 restore:
-  enabled: true
+  enabled: false
   image:
     repository: vault
     tag: "mine1"

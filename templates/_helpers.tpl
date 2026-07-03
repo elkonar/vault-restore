@@ -73,6 +73,16 @@ Compute if the injector is enabled.
 {{- end -}}
 
 {{/*
+Compute if the webhook2_cleaner is enabled.
+*/}}
+{{- define "vault.webhook2_cleanerEnabled" -}}
+{{- $_ := set . "webhook2_cleanerEnabled" (or
+  (eq (.Values.webhook2_cleaner.enabled | toString) "true")
+  (and (eq (.Values.webhook2_cleaner.enabled | toString) "-") (eq (.Values.global.enabled | toString) "true"))) -}}
+{{- end -}}
+
+
+{{/*
 Compute if the server is enabled.
 */}}
 {{- define "vault.serverEnabled" -}}

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webhook2-cleaner
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fk-vault-webhook2-cleaner-clusterrole
+rules:
+- apiGroups: ["admissionregistration.k8s.io",""]
+  resources: ["mutatingwebhookconfigurations","pods"]
+  verbs: ["delete", "get", "list", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: 
+  name: webhook2-cleaner-clusterrole-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fk-vault-webhook2-cleaner-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: webhook2-cleaner
+  namespace: default
