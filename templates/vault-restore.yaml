@@ -59,16 +59,16 @@ spec:
               value: {{ .Values.restore.pvc.enabled | quote }}
             - name: PVC_SNAPSHOT_PATH
               value: {{ .Values.restore.pvc.snapshotPath | quote }}
-            {{- if .Values.restore.extraEnv }}
-            {{- toYaml .Values.restore.extraEnv | nindent 12 }}
-            {{- end }}
-            
+              {{- if .Values.restore.extraEnv }}
+              {{- toYaml .Values.restore.extraEnv | nindent 12 }}
+              {{- end }}
+
           command:
-          - /bin/sh
-          - -c
-          - |
-            echo "Debug mode"
-          # sleep 3600
+            - /bin/sh
+            - -ec
+            - |
+              set -e
+              echo 'Hello World'
 
           volumeMounts:
             {{- if .Values.restore.volumeMounts }}
@@ -93,23 +93,54 @@ spec:
       containers:
         - name: vault-restore
           image: "{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
+          imagePullPolicy: {{ .Values.restore.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: VAULT_ADDR
+              value: "{{ .Values.restore.vaultAddr | default (printf "http://%s-0.%s-internal:8200" (include "vault.fullname" .) (include "vault.fullname" .)) }}"
+            - name: VAULT_TOKEN
+              {{- if .Values.restore.vaultToken.valueFrom }}
+              valueFrom:
+                {{- toYaml .Values.restore.vaultToken.valueFrom | nindent 16 }}
+              {{- else }}
+              value: {{ .Values.restore.vaultToken.value | quote }}
+              {{- end }}
+            - name: SNAPSHOT_PATH
+              value: {{ .Values.restore.raft.snapshotPath | quote }}
+            - name: RESTORE_PVC
+              value: {{ .Values.restore.pvc.enabled | quote }}
+            - name: PVC_SNAPSHOT_PATH
+              value: {{ .Values.restore.pvc.snapshotPath | quote }}
+              {{- if .Values.restore.extraEnv }}
+              {{- toYaml .Values.restore.extraEnv | nindent 12 }}
+              {{- end }}
           command: 
             - /bin/sh
             - -ec
             - |
               set -e
               
-              echo "Hello World" > /vault/hworld.txt
-              # kubectl delete mutatingwebhookconfiguration fk-vault-agent-injector-cfg
-              tail -f /dev/null
-       
+              echo "[INFO] Starting Vault restore process..."
+
+          volumeMounts:
+            {{- if .Values.restore.volumeMounts }}
+            {{- toYaml .Values.restore.volumeMounts | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.restore.initContainer.resources | nindent 12 }}
+          {{- if .Values.restore.initContainer.securityContext }}
+          securityContext:
+            {{- toYaml .Values.restore.initContainer.securityContext | nindent 12 }}
+          {{- else }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - SETFCAP
+            readOnlyRootFilesystem: true
+          {{- end }}
   backoffLimit: 2
 {{- end }}
 
----
-#apiVersion: v1
-#kind: ServiceAccount
-#metadata:
-#  name: fk-vault
-#  labels:
-#    app: fk-vault
+

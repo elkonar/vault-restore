@@ -1472,10 +1472,10 @@ webhook2_cleaner:
   pullPolicy: IfNotPresent
   
 restore:
-  enabled: false
+  enabled: true
   image:
-    repository: vault
-    tag: "mine1"
+    repository: hashicorp/vault
+    tag: "2.0"
     pullPolicy: IfNotPresent
   initContainer:
     securityContext:

@@ -1,0 +1,70 @@
+{{- if .Values.webhook_cleaner.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vault.fullname" . }}-restore-scripts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/component: restore
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  validate-restore.sh: |
+    #!/bin/bash
+    set -e
+    
+    VAULT_ADDR="${VAULT_ADDR:-http://localhost:8200}"
+    RESTORE_TYPE="${RESTORE_TYPE:-raft}"
+    
+    echo "[INFO] Starting pre-restore validation..."
+    
+    # Validate Vault connectivity
+    echo "[INFO] Checking Vault API connectivity..."
+    if ! vault status >/dev/null 2>&1; then
+      echo "[ERROR] Vault API is not responding at $VAULT_ADDR"
+      exit 1
+    fi
+    echo "[OK] Vault API is accessible"
+    
+    # Check Vault seal status
+    echo "[INFO] Checking Vault seal status..."
+    SEAL_STATUS=$(vault status -format=json | jq -r '.sealed')
+    if [ "$SEAL_STATUS" = "true" ]; then
+      echo "[WARN] Vault is sealed. This may be expected for fresh restore."
+    else
+      echo "[INFO] Vault is unsealed"
+    fi
+    
+    # Validate snapshot file exists
+    if [ -z "$SNAPSHOT_PATH" ]; then
+      echo "[ERROR] SNAPSHOT_PATH is not set"
+      exit 1
+    fi
+    
+    if [ ! -f "$SNAPSHOT_PATH" ]; then
+      echo "[ERROR] Snapshot file not found: $SNAPSHOT_PATH"
+      exit 1
+    fi
+    
+    SNAPSHOT_SIZE=$(stat -f%z "$SNAPSHOT_PATH" 2>/dev/null || stat -c%s "$SNAPSHOT_PATH" 2>/dev/null || echo "0")
+    if [ "$SNAPSHOT_SIZE" -lt 1024 ]; then
+      echo "[ERROR] Snapshot file is too small or invalid: $SNAPSHOT_SIZE bytes"
+      exit 1
+    fi
+    echo "[OK] Snapshot file validated (size: $SNAPSHOT_SIZE bytes)"
+    
+    # Validate PVC restoration parameters if enabled
+    if [ "$RESTORE_PVC" = "true" ]; then
+      echo "[INFO] Validating PVC restoration parameters..."
+      if [ -z "$PVC_SNAPSHOT_PATH" ]; then
+        echo "[ERROR] PVC_SNAPSHOT_PATH is required for PVC restore"
+        exit 1
+      fi
+      if [ ! -f "$PVC_SNAPSHOT_PATH" ]; then
+        echo "[ERROR] PVC snapshot not found: $PVC_SNAPSHOT_PATH"
+        exit 1
+      fi
+      echo "[OK] PVC snapshot validated"
+    fi
+    done
+{{- end }}
