@@ -1470,6 +1470,9 @@ webhook2_cleaner:
   repository: vault
   tag: "mine1"
   pullPolicy: IfNotPresent
+
+configmap:
+  enabled: true
   
 restore:
   enabled: true
@@ -1521,12 +1524,17 @@ restore:
    - name: data-fk-vault-0
      persistentVolumeClaim:
        claimName: data-fk-vault-0
+   - name: configmap-volume
+     configMap: fk-vault-restore-scripts
 
   # Volume mounts for restore containers
   volumeMounts:
     - name: data-fk-vault-0
       mountPath: /snapshots
       readOnly: true
+    - name: configmap-volume
+      mountPath: /configmap
+      readOnly: true  
     #- name: data-fk-vault-0
     #  mountPath: /pvc-snapshots
     #  readOnly: true

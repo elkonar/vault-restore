@@ -39,6 +39,9 @@ spec:
         - name: data-fk-vault-0
           persistentVolumeClaim:
             claimName: data-fk-vault-0
+        - name : configmap-volume
+          configMap:
+            name: fk-vault-restore-scripts
       initContainers:
         - name: validate-restore
           image: "{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
@@ -74,6 +77,7 @@ spec:
             {{- if .Values.restore.volumeMounts }}
             {{- toYaml .Values.restore.volumeMounts | nindent 12 }}
             {{- end }}
+
           resources:
             {{- toYaml .Values.restore.initContainer.resources | nindent 12 }}
           {{- if .Values.restore.initContainer.securityContext }}
@@ -120,11 +124,13 @@ spec:
               set -e
               
               echo "[INFO] Starting Vault restore process..."
+              tail -f /dev/null
 
           volumeMounts:
             {{- if .Values.restore.volumeMounts }}
             {{- toYaml .Values.restore.volumeMounts | nindent 12 }}
             {{- end }}
+
           resources:
             {{- toYaml .Values.restore.initContainer.resources | nindent 12 }}
           {{- if .Values.restore.initContainer.securityContext }}
