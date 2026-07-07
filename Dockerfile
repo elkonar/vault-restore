@@ -2,7 +2,7 @@ FROM hashicorp/vault:2.0
 
 USER root
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl jq
 
 RUN apk update && apk add --no-cache \
     curl \
