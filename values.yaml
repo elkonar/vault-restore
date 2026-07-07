@@ -1477,8 +1477,8 @@ configmap:
 restore:
   enabled: true
   image:
-    repository: hashicorp/vault
-    tag: "2.0"
+    repository: vault
+    tag: "mine2"
     pullPolicy: IfNotPresent
   initContainer:
     securityContext:
@@ -1509,7 +1509,7 @@ restore:
   raft:
     enabled: true
     # Path to the Raft snapshot file
-    snapshotPath: "-"
+    snapshotPath: "/tmp/fk-vault-raft.snap
     # Timeout for restore operation in seconds
     restoreTimeout: 300
     # PVC restoration configuration
@@ -1524,17 +1524,19 @@ restore:
    - name: data-fk-vault-0
      persistentVolumeClaim:
        claimName: data-fk-vault-0
-   - name: configmap-volume
-     configMap: fk-vault-restore-scripts
+   - name : configmap-volume
+     configMap:
+       name: fk-vault-restore-scripts
+       defaultMode: 0755
 
   # Volume mounts for restore containers
   volumeMounts:
     - name: data-fk-vault-0
       mountPath: /snapshots
-      readOnly: true
+      readOnly: false
     - name: configmap-volume
       mountPath: /configmap
-      readOnly: true  
+      readOnly: false  
     #- name: data-fk-vault-0
     #  mountPath: /pvc-snapshots
     #  readOnly: true

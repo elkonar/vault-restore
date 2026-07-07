@@ -13,10 +13,10 @@ data:
     #!/bin/bash
     set -e
     
-    VAULT_ADDR="${VAULT_ADDR:-http://localhost:8200}"
+    VAULT_ADDR="${VAULT_ADDR:-http://localhost:8201}"
     RESTORE_TYPE="${RESTORE_TYPE:-raft}"
     
-    echo "[INFO] Starting pre-restore validation..."
+        echo "[INFO] Starting pre-restore validation..."
     
     # Validate Vault connectivity
     echo "[INFO] Checking Vault API connectivity..."
@@ -25,7 +25,7 @@ data:
       exit 1
     fi
     echo "[OK] Vault API is accessible"
-    
+       
     # Check Vault seal status
     echo "[INFO] Checking Vault seal status..."
     SEAL_STATUS=$(vault status -format=json | jq -r '.sealed')

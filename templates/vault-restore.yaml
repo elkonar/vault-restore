@@ -36,12 +36,9 @@ spec:
         runAsUser: 100
         fsGroup: 1000
       volumes:
-        - name: data-fk-vault-0
-          persistentVolumeClaim:
-            claimName: data-fk-vault-0
-        - name : configmap-volume
-          configMap:
-            name: fk-vault-restore-scripts
+        {{- if .Values.restore.volumes }}
+        {{- toYaml .Values.restore.volumes | nindent 12 }}
+          {{- end }}
       initContainers:
         - name: validate-restore
           image: "{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
@@ -72,7 +69,8 @@ spec:
             - |
               set -e
               echo 'Hello World'
-
+                            
+              
           volumeMounts:
             {{- if .Values.restore.volumeMounts }}
             {{- toYaml .Values.restore.volumeMounts | nindent 12 }}
@@ -91,13 +89,13 @@ spec:
                 - ALL
               add:
                 - SETFCAP
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false
           {{- end }}
   
       containers:
         - name: vault-restore
           image: "{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
-          imagePullPolicy: {{ .Values.restore.image.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.restore.image.pullPolicy | default "Always" }}
           env:
             - name: VAULT_ADDR
               value: "{{ .Values.restore.vaultAddr | default (printf "http://%s-0.%s-internal:8200" (include "vault.fullname" .) (include "vault.fullname" .)) }}"
@@ -124,7 +122,9 @@ spec:
               set -e
               
               echo "[INFO] Starting Vault restore process..."
+              
               tail -f /dev/null
+
 
           volumeMounts:
             {{- if .Values.restore.volumeMounts }}
@@ -144,7 +144,7 @@ spec:
                 - ALL
               add:
                 - SETFCAP
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false
           {{- end }}
   backoffLimit: 2
 {{- end }}
