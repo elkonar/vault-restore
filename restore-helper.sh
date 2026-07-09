@@ -103,6 +103,38 @@ EOF
   kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault login "$ROOT_TOKEN"
 }
 
+# Create restore token
+create_token() {
+  local policy="${1:-root}"
+  
+  log_info "Creating restore token with policy: $policy"
+  
+  # Get Vault pod
+  local vault_pod=$(kubectl get pods -n default -l apps.kubernetes.io/pod-index=0,component=server -o jsonpath='{.items[0].metadata.name}')
+  
+  if [ -z "$vault_pod" ]; then
+    log_error "No Vault pod found in namespace: $NAMESPACE"
+  fi
+  
+  log_info "Using Vault pod: $vault_pod"
+  
+  # Generate token
+  local token=$(kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault token create -policy="$policy" -format=json | jq -r '.auth.client_token')
+  
+  if [ -z "$token" ]; then
+    log_error "Failed to create token"
+  fi
+  
+  # Create secret
+  kubectl create secret generic vault-restore-token \
+    --from-literal=token="$token" \
+    -n "$NAMESPACE" \
+     -o yaml | kubectl apply -f -
+  
+  log_success "Restore token created and stored in secret: vault-restore-token"
+  echo "Token: $token"
+}
+
 
 # Force raft restore
 raft_restore() {
@@ -127,6 +159,9 @@ case "$1" in
   raft-restore)
     raft_restore "${2:-fk-vault-0}"
     ;;
+  create-token)
+    create_token "${3:-root}" 
+    ;;
   *)
     log_error "Unknown command: $1"
     usage
@@ -135,7 +170,9 @@ case "$1" in
 esac
 
 # commands
-# bash -x ./restore-helper.sh upload-snapshot ./fk-vault-raft.snap fk-vault-0 /snapshots/fk-vault-raft.snap
+# bash -x ./restore-helper.sh upload-snapshot ./fk-vault-raft-2026-04-29.snap fk-vault-0 /snapshots/fk-vault-raft.snap
 # bash -x ./restore-helper.sh init_unseal_new fk-vault-0
+# bash -x ./restore-helper.sh create-token root
+#
 # bash -x ./restore-helper.sh raft-restore fk-vault-0
 

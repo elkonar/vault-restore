@@ -1477,7 +1477,7 @@ configmap:
   enabled: true
   
 restore:
-  enabled: true
+  enabled: false
   image:
     repository: vault
     tag: "mine2"

@@ -68,9 +68,12 @@ spec:
             - -ec
             - |
               set -e
-              echo 'Hello World'
-                            
-              
+
+              if ! vault status >/dev/null 2>&1; then
+                echo "[ERROR] Vault API is not responding at $VAULT_ADDR"
+               exit 1
+              fi
+
           volumeMounts:
             {{- if .Values.restore.volumeMounts }}
             {{- toYaml .Values.restore.volumeMounts | nindent 12 }}
@@ -121,7 +124,6 @@ spec:
             - |
               set -e
               
-              tail -f /dev/null
 
               sh /configmap/prevalidate-restore.sh
 
