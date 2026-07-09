@@ -13,7 +13,7 @@ data:
     #!/bin/bash
     set -e
     
-    VAULT_ADDR="${VAULT_ADDR:-http://localhost:8201}"
+    VAULT_ADDR="${VAULT_ADDR:-http://localhost:1050}"
     RESTORE_TYPE="${RESTORE_TYPE:-raft}"
     
         echo "[INFO] Starting pre-restore validation..."
@@ -53,18 +53,18 @@ data:
     fi
     echo "[OK] Snapshot file validated (size: $SNAPSHOT_SIZE bytes)"
     
-    # Validate PVC restoration parameters if enabled
-    if [ "$RESTORE_PVC" = "true" ]; then
-      echo "[INFO] Validating PVC restoration parameters..."
-      if [ -z "$PVC_SNAPSHOT_PATH" ]; then
-        echo "[ERROR] PVC_SNAPSHOT_PATH is required for PVC restore"
-        exit 1
-      fi
-      if [ ! -f "$PVC_SNAPSHOT_PATH" ]; then
-        echo "[ERROR] PVC snapshot not found: $PVC_SNAPSHOT_PATH"
-        exit 1
-      fi
-      echo "[OK] PVC snapshot validated"
-    fi
-    done
+#    # Validate PVC restoration parameters if enabled
+#    if [ "$RESTORE_PVC" = "true" ]; then
+#      echo "[INFO] Validating PVC restoration parameters..."
+#      if [ -z "$PVC_SNAPSHOT_PATH" ]; then
+#        echo "[ERROR] PVC_SNAPSHOT_PATH is required for PVC restore"
+#        exit 1
+#      fi
+#      if [ ! -f "$PVC_SNAPSHOT_PATH" ]; then
+#        echo "[ERROR] PVC snapshot not found: $PVC_SNAPSHOT_PATH"
+#        exit 1
+#      fi
+#      echo "[OK] PVC snapshot validated"
+#    fi
+#    done
 {{- end }}

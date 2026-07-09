@@ -65,6 +65,9 @@ spec:
         {{ template "vault.volumes" . }}
         - name: home
           emptyDir: {}
+        - name: data-fk-vault-0
+          persistentVolumeClaim:
+            claimName: data-fk-vault-0
       {{- if .Values.server.hostAliases }}
       hostAliases:
         {{ toYaml .Values.server.hostAliases | nindent 8}}
@@ -155,6 +158,9 @@ spec:
           {{ template "vault.mounts" . }}
             - name: home
               mountPath: /home/vault
+            - name: data-fk-vault-0
+              mountPath: /snapshots
+              readOnly: false
           ports:
             - containerPort: 8200
               name: {{ include "vault.scheme" . }}

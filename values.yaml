@@ -1509,7 +1509,7 @@ restore:
   raft:
     enabled: true
     # Path to the Raft snapshot file
-    snapshotPath: "/tmp/fk-vault-raft.snap
+    snapshotPath: "/snapshots/fk-vault-raft.snap"
     # Timeout for restore operation in seconds
     restoreTimeout: 300
     # PVC restoration configuration

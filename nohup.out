@@ -2,3 +2,25 @@ Unable to listen on port 1050: Listeners failed to create with the following err
 error: unable to listen on any of the requested ports: [{1050 8200}]
 Forwarding from 127.0.0.1:1050 -> 8200
 Forwarding from [::1]:1050 -> 8200
+Forwarding from 127.0.0.1:1050 -> 8200
+Forwarding from [::1]:1050 -> 8200
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Forwarding from 127.0.0.1:1050 -> 8200
+Forwarding from [::1]:1050 -> 8200
+Forwarding from 127.0.0.1:1050 -> 8200
+Forwarding from [::1]:1050 -> 8200
+Forwarding from 127.0.0.1:1050 -> 8200
+Forwarding from [::1]:1050 -> 8200
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Handling connection for 1050
+Forwarding from 127.0.0.1:1050 -> 8200
+Forwarding from [::1]:1050 -> 8200
