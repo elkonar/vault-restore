@@ -121,10 +121,15 @@ spec:
             - |
               set -e
               
-              echo "[INFO] Starting Vault restore process..."
-              
               tail -f /dev/null
 
+              sh /configmap/prevalidate-restore.sh
+
+              echo "Pre-validation completed successfully. Waiting 5 seconds..."
+              sleep 30
+
+              sh /configmap/restore-raft.sh
+              
 
           volumeMounts:
             {{- if .Values.restore.volumeMounts }}

@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: restore
     app.kubernetes.io/instance: {{ .Release.Name }}
 data:
-  validate-restore.sh: |
+  prevalidate-restore.sh: |
     #!/bin/bash
     set -e
     
@@ -67,4 +67,39 @@ data:
 #      echo "[OK] PVC snapshot validated"
 #    fi
 #    done
+  restore-raft.sh: |
+    #!/bin/bash
+    set -e
+    
+    VAULT_ADDR="${VAULT_ADDR:-http://localhost:1050}"
+    RESTORE_TIMEOUT="${RESTORE_TIMEOUT:-300}"
+    
+    echo "[INFO] Starting Raft snapshot restore..."
+    echo "[INFO] Snapshot path: $SNAPSHOT_PATH"
+    
+    # Wait for Vault API to be available
+    echo "[INFO] Waiting for Vault API..."
+    ELAPSED=0
+    while [ $ELAPSED -lt 60 ]; do
+      if vault status >/dev/null 2>&1; then
+        echo "[OK] Vault API is available"
+        break
+      fi
+      sleep 5
+      ELAPSED=$((ELAPSED + 5))
+    done
+    
+    if [ $ELAPSED -ge 60 ]; then
+      echo "[ERROR] Vault API did not become available within timeout"
+      exit 1
+    fi
+    
+    # Perform Raft snapshot restore
+    echo "[INFO] Restoring Raft snapshot..."
+    if vault operator raft snapshot restore -force "$SNAPSHOT_PATH"; then
+      echo "[OK] Raft snapshot restored successfully"
+    else
+      echo "[ERROR] Failed to restore Raft snapshot"
+      exit 1
+    fi
 {{- end }}

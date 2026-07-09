@@ -24,3 +24,5 @@ Handling connection for 1050
 Handling connection for 1050
 Forwarding from 127.0.0.1:1050 -> 8200
 Forwarding from [::1]:1050 -> 8200
+Forwarding from 127.0.0.1:1050 -> 8200
+Forwarding from [::1]:1050 -> 8200

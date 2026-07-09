@@ -135,7 +135,7 @@ case "$1" in
 esac
 
 # commands
-# bash -x ./restore-helper.sh upload-snapshot ./fk-vault-raft-2026-04-29.snap fk-vault-0 /tmp/fk-vault-raft-2026-04-29.snap
+# bash -x ./restore-helper.sh upload-snapshot ./fk-vault-raft.snap fk-vault-0 /snapshots/fk-vault-raft.snap
 # bash -x ./restore-helper.sh init_unseal_new fk-vault-0
 # bash -x ./restore-helper.sh raft-restore fk-vault-0
 
