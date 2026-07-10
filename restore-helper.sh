@@ -53,13 +53,14 @@ upload_snapshot() {
 
 # Init and unseal new vault
 init_unseal_new() {
-  local vault_pod="${1:-fk-vault-0}"
+  local namespace="$1" 
+  local vault_pod="${2:-fk-vault-0}"
   local creds_file="${VAULT_CREDS_FILE:-$SCRIPT_DIR/.vault-init.env}"
 
-  if kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault status -format=json | jq -e '.initialized == true' > /dev/null; then
+  if kubectl exec -n "$namespace" "$vault_pod" -- vault status -format=json | jq -e '.initialized == true' > /dev/null; then
     echo "Vault is already initialized. Skipping init."
 
-    if kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault status -format=json | jq -e '.sealed == true' > /dev/null; then
+    if kubectl exec -n "$namespace" "$vault_pod" -- vault status -format=json | jq -e '.sealed == true' > /dev/null; then
       echo "Vault is sealed. Unsealing.."
       if [ -z "$UNSEAL_KEY" ] && [ -f "$creds_file" ]; then
         # shellcheck disable=SC1090
@@ -68,14 +69,14 @@ init_unseal_new() {
       if [ -z "$UNSEAL_KEY" ]; then
         log_error "UNSEAL_KEY is not set. Export it or source $creds_file"
       fi
-      kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault operator unseal "$UNSEAL_KEY"
+      kubectl exec -n "$namespace" "$vault_pod" -- vault operator unseal "$UNSEAL_KEY"
     fi
 
     return 0
   fi
 
   local INIT_OUTPUT
-  INIT_OUTPUT=$(kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault operator init -n 1 -t 1 -format=json)
+  INIT_OUTPUT=$(kubectl exec -n "$namespace" "$vault_pod" -- vault operator init -n 1 -t 1 -format=json)
 
   export UNSEAL_KEY
   UNSEAL_KEY=$(echo "$INIT_OUTPUT" | jq -r '.unseal_keys_b64[0]')
@@ -98,29 +99,30 @@ EOF
   log_info "Load them in your shell with: source $creds_file"
 
 # unseal vault
-  kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault operator unseal "$UNSEAL_KEY"
+  kubectl exec -n "$namespace" "$vault_pod" -- vault operator unseal "$UNSEAL_KEY"
 
 # vault login with new root
-  kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault login "$ROOT_TOKEN"
+  kubectl exec -n "$namespace" "$vault_pod" -- vault login "$ROOT_TOKEN"
 }
 
 # Create restore token
 create_token() {
-  local policy="${1:-root}"
+  local namespace="$1"
+  local policy="${2:-root}"
   
   log_info "Creating restore token with policy: $policy"
   
   # Get Vault pod
-  local vault_pod=$(kubectl get pods -n default -l apps.kubernetes.io/pod-index=0,component=server -o jsonpath='{.items[0].metadata.name}')
+  local vault_pod=$(kubectl get pods -n "$namespace" -l apps.kubernetes.io/pod-index=0,component=server -o jsonpath='{.items[0].metadata.name}')
   
   if [ -z "$vault_pod" ]; then
-    log_error "No Vault pod found in namespace: $NAMESPACE"
+    log_error "No Vault pod found in namespace: $namespace"
   fi
   
   log_info "Using Vault pod: $vault_pod"
   
   # Generate token
-  local token=$(kubectl exec -n "$NAMESPACE" "$vault_pod" -- vault token create -policy="$policy" -format=json | jq -r '.auth.client_token')
+  local token=$(kubectl exec -n "$namespace" "$vault_pod" -- vault token create -policy="$policy" -format=json | jq -r '.auth.client_token')
   
   if [ -z "$token" ]; then
     log_error "Failed to create token"
@@ -129,7 +131,7 @@ create_token() {
   # Create secret
   kubectl create secret generic vault-restore-token \
     --from-literal=token="$token" \
-    -n "$NAMESPACE" \
+    -n "$namespace" \
      -o yaml | kubectl apply -f -
   
   log_success "Restore token created and stored in secret: vault-restore-token"
@@ -139,8 +141,9 @@ create_token() {
 
 # Force raft restore
 raft_restore() {
-  local container="${1:-fk-vault-0}"
-  local job=$(kubectl exec -it -n "$NAMESPACE" "$container" -- sh -c 'set -- /tmp/*snap; [ -e "$1" ] || exit 1; vault operator raft snapshot restore -force "$1"')
+  local namespace="$1"
+  local container="${2:-fk-vault-0}"
+  local job=$(kubectl exec -it -n "$namespace" "$container" -- sh -c 'set -- /snapshots/fk-vault-raft.snap; [ -e "$1" ] || exit 1; vault operator raft snapshot restore -force "$1"')
 }
 
 
@@ -155,13 +158,13 @@ case "$1" in
     upload_snapshot "$2" "$3" "$4" "$5"
     ;;
   init_unseal_new)
-    init_unseal_new "${2:-fk-vault-0}"
+    init_unseal_new "$2" "${3:-fk-vault-0}"
     ;;
   raft-restore)
-    raft_restore "${2:-fk-vault-0}"
+    raft_restore "$2" "${3:-fk-vault-0}"
     ;;
   create-token)
-    create_token "${3:-root}" 
+    create_token "$2" "${3:-root}" 
     ;;
   *)
     log_error "Unknown command: $1"
@@ -172,8 +175,8 @@ esac
 
 # commands
 # bash -x ./restore-helper.sh upload-snapshot default ./fk-vault-raft-2026-04-29.snap fk-vault-0 /snapshots/fk-vault-raft.snap
-# bash -x ./restore-helper.sh init_unseal_new fk-vault-0
-# bash -x ./restore-helper.sh create-token root
+# bash -x ./restore-helper.sh init_unseal_new default fk-vault-0
+# bash -x ./restore-helper.sh create-token default root
 #
-# bash -x ./restore-helper.sh raft-restore fk-vault-0
+# bash -x ./restore-helper.sh raft-restore default fk-vault-0  <<- Job is doing that, thi is for teting only
 
