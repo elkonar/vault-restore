@@ -35,17 +35,18 @@ log_error() {
 
 # Upload snapshot to Kubernetes
 upload_snapshot() {
-  local local_file="$1"
-  local k8s_pod="$2"
-  local remote_path="$3"
+  local namespace="$1"
+  local local_file="$2"
+  local k8s_pod="$3"
+  local remote_path="$4"
 
   log_info "Uploading snapshot: $local_file -> $k8s_pod:$remote_path"
 
   # Create remote directory
-  kubectl exec -n "$NAMESPACE" "$k8s_pod" -- mkdir -p "$(dirname "$remote_path")" || true
+  kubectl exec -n "$namespace" "$k8s_pod" -- mkdir -p "$(dirname "$remote_path")" || true
 
   # Copy file
-  kubectl cp "$local_file" "$NAMESPACE/$k8s_pod:$remote_path"
+  kubectl cp "$local_file" "$namespace/$k8s_pod:$remote_path"
 
   log_success "Snapshot uploaded"
 }
@@ -151,7 +152,7 @@ fi
 
 case "$1" in
   upload-snapshot)
-    upload_snapshot "$2" "$3" "$4"
+    upload_snapshot "$2" "$3" "$4" "$5"
     ;;
   init_unseal_new)
     init_unseal_new "${2:-fk-vault-0}"
@@ -170,7 +171,7 @@ case "$1" in
 esac
 
 # commands
-# bash -x ./restore-helper.sh upload-snapshot ./fk-vault-raft-2026-04-29.snap fk-vault-0 /snapshots/fk-vault-raft.snap
+# bash -x ./restore-helper.sh upload-snapshot default ./fk-vault-raft-2026-04-29.snap fk-vault-0 /snapshots/fk-vault-raft.snap
 # bash -x ./restore-helper.sh init_unseal_new fk-vault-0
 # bash -x ./restore-helper.sh create-token root
 #
