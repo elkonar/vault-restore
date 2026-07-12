@@ -10,7 +10,7 @@ spec:
   ttlSecondsAfterFinished: 30 #0
   template:
     spec:
-      serviceAccountName: fk-vault-webhook2-cleaner
+      serviceAccountName: {{ include "vault.name" . }}-webhook2-cleaner
       restartPolicy: Never
       containers:
       - name: kubectl

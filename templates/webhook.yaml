@@ -10,7 +10,7 @@ spec:
   ttlSecondsAfterFinished: 30 #0
   template:
     spec:
-      serviceAccountName: fk-vault-agent-injector
+      serviceAccountName: {{ include "vault.name" . }}-agent-injector
       restartPolicy: Never
       containers:
       - name: kubectl
