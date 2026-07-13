@@ -5,7 +5,7 @@ kind: ClusterRole
 metadata:
   name: {{ template "vault.fullname" . }}-webhook2-cleaner-clusterrole
   labels:
-    app.kubernetes.io/name: {{ include "vault.name" . }}-webhook2_-leaner
+    app.kubernetes.io/name: {{ include "vault.name" . }}-webhook2-cleaner
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 rules:

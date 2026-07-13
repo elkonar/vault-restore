@@ -1467,7 +1467,7 @@ webhook_cleaner:
   pullPolicy: IfNotPresent
 
 webhook2_cleaner:
-  enabled: true
+  enabled: false
   image:
   repository: vault
   tag: "mine1"

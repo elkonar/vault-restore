@@ -10,16 +10,16 @@ spec:
   ttlSecondsAfterFinished: 30 #0
   template:
     spec:
-      serviceAccountName: {{ include "vault.name" . }}-webhook2-cleaner
+      serviceAccountName: {{ include "vault.fullname" . }}-webhook2-cleaner    # <<- here was naming mimatch
       restartPolicy: Never
       containers:
       - name: kubectl
-        image: vault:mine1 #{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
+        image: vault:mine2 #{{ .Values.restore.image.repository }}:{{ .Values.restore.image.tag }}"
         command:
         - /bin/sh
         - -ec
         - |
           ls -al > /tmp/tmp.txt
-          # tail -f /dev/null
+          #tail -f /dev/null
           kubectl delete mutatingwebhookconfigurations --all
 {{- end }}
