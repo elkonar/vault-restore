@@ -10,7 +10,7 @@ spec:
   ttlSecondsAfterFinished: 30 #0
   template:
     spec:
-      serviceAccountName: {{ include "vault.fullname" . }}-webhook2-cleaner    # <<- here was naming mimatch
+      serviceAccountName: {{ include "vault.fullname" . }}-webhook2-cleaner    # <<- here was naming mismatch
       restartPolicy: Never
       containers:
       - name: kubectl
