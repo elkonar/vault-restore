@@ -416,8 +416,8 @@ server:
   # }
 
   image:
-    repository: "hashicorp/vault"
-    tag: "2.0.2"
+    repository: "vault" # was"hashicorp/vault"
+    tag: "mine3" # "2.0.2"
     # Overrides the default Image Pull Policy
     pullPolicy: IfNotPresent
 
@@ -1480,7 +1480,7 @@ restore:
   enabled: false
   image:
     repository: vault
-    tag: "mine2"
+    tag: "mine3"
     pullPolicy: IfNotPresent
   initContainer:
     securityContext:
