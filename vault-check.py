@@ -1,9 +1,12 @@
-#raft-restore.py
+#vault-check.py
 
 import subprocess
 import argparse
+import sys
 from pathlib import Path
 import logging
+
+logger = logging.getLogger(__name__)
 
 class raft_restore:
     def __init__(self):
@@ -11,15 +14,15 @@ class raft_restore:
     def log_info(self, message: str):
         print(f"[INFO] doing {message}")
     def log_success(self, message: str):
-        print(f"[SUCCESS] { message}")
-    def subpro_run(
+        print(f"[SUCCESS] because {message}")
+    def subprocess_run(
         self,
         command: list[str],
         *,
         timeout: int | None = None,
         ignore_errors: bool = False,
-    ) -> str:
-    
+    ): # -> str:
+
         try:
             result = subprocess.run(
                 command,
@@ -28,10 +31,19 @@ class raft_restore:
                 timeout=timeout,
                 text=True,
             )
-        except subprocess.CalledProcessError as exec:
-            if not ignore_errors:
-                raise
-            return "" 
+            output = result.stdout
+            return output
+        except subprocess.CalledProcessError as exc:
+            if exc.stdout:
+                print(exc.stdout, end="")   # <<- end="" just removes last line
+            if exc.stderr:
+                print(exc.stderr, end="", file=sys.stderr)
+                print("[WARNING] custom message")
+
+            if ignore_errors:
+                return    # <<- if variable ignore_errors is true return empty string
+            print("[INFO] command failed for reasons")
+            return None
     def raft_r(
         self,
         namespace: str,
@@ -40,7 +52,7 @@ class raft_restore:
     ):
         restore_path=str(Path(dest).parent)
 
-        self.subpro_run(
+        self.subprocess_run(
             [ 
             "kubectl",
             "exec",
@@ -49,14 +61,13 @@ class raft_restore:
             pod,
             "--",
             "vault",
-            "operator raft snapshot restore -force",
-            restore_path,
+            "status",   # "operator raft snapshot restore -force",
+            #restore_path,
+            #"/",
             ],
-            ignore_errors =True
+            ignore_errors = False
         )
-        self.log_success(
-            f"Hurra!"
-        )
+        self.log_success("Hurra! everything went fine.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
