@@ -1,4 +1,4 @@
-#wut?
+#SnapUploader
 import subprocess
 from pathlib import Path
 import argparse
